@@ -1,0 +1,10 @@
+# PyTorch dependencies - install these FIRST with compatible versions
+# CPU version (recommended for most users)
+--index-url https://download.pytorch.org/whl/cpu
+torch>=2.0.0
+torchvision>=0.15.0
+
+# For GPU support (CUDA 11.8), use instead:
+# --index-url https://download.pytorch.org/whl/cu118
+# torch>=2.0.0
+# torchvision>=0.15.0
