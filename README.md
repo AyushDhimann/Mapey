@@ -44,13 +44,6 @@
   - FAISS vector store with RAG (Retrieval Augmented Generation)
   - Semantic search and web scraping (Tavily)
 
-- **📊 Real-Time Progress Tracking** ⭐ NEW
-  - **Live progress bar** (0-100%) with smooth animations
-  - **Stage-by-stage status updates** (6 visual indicators)
-  - **Server-Sent Events (SSE) streaming** for real-time feedback
-  - **Time estimates** (typically 3-5 minutes)
-  - **Cyberpunk dark theme** with red/black aesthetic
-
 - **💼 Comprehensive Career Analysis**
   - Role breakdown and industry expectations
   - Skill gap identification
