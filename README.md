@@ -18,7 +18,6 @@
 - [Overview](#-overview)
 - [Features](#-features)
 - [Quick Start](#-quick-start)
-- [Real-Time Progress](#-real-time-progress-tracking)
 - [API Documentation](#-api-documentation)
 - [Testing](#-testing)
 - [Troubleshooting](#-troubleshooting)
@@ -98,7 +97,7 @@
    python -m mapey setup
    ```
 
-3. **Update your ENVs**
+3. **Update your ENVs** (Clerk and Tavily)
 
 4. **Start all services** (runs Docker containers for backend, frontend, and Ollama)
    ```powershell
@@ -139,16 +138,6 @@ You can also **upload a PDF/TXT resume** instead of pasting text:
 4. Click **"Generate Roadmap"**
 5. Progress updates shown in results area
 
-## 📊 Real-Time Progress Tracking
-
-### Features
-
-- **Live Progress Bar** - Visual feedback from 0% to 100%
-- **Stage Indicators** - 6 circular badges showing workflow progress
-- **Status Messages** - Real-time updates on current activity
-- **Smooth Animations** - Shimmer effects and smooth transitions
-- **Time Estimates** - Shows typical 3-5 minute duration
-
 ### How It Works
 
 ```
@@ -159,8 +148,6 @@ Opens EventSource to /generate-from-text-stream
 Backend sends real-time updates:
   data: {"progress": 10, "step": "Analyzing..."}
   data: {"progress": 45, "step": "Skill gaps..."}
-   ↓
-Progress Bar updates with animations
    ↓
 Final Result delivered at 100%
 ```
@@ -174,19 +161,6 @@ Final Result delivered at 100%
 5. **Resource Curator** (70-80%) - Finds best learning resources via web search
 6. **Validator** (85-100%) - Generates final comprehensive roadmap
 
-### Visual Design
-
-```
-Progress Bar:
-┌────────────────────────────────────────────┐
-│ ████████████████████░░░░░░░░░░░░░░░░░░░░  │ 45%
-└────────────────────────────────────────────┘
-   "Analyzing skill gaps..."
-
-Stage Indicators:
- [✓] [✓] [●] [ ] [ ] [ ]
-  1   2   3   4   5   6
-```
 
 ## 📡 API Documentation
 
@@ -308,48 +282,6 @@ $body = @{
 Invoke-RestMethod -Uri "http://localhost:8000/api/v1/roadmap/generate-from-text-stream" -Method Post -Body $body -Headers $headers
 ```
 
-## 🛠️ Configuration
-
-### Environment Variables
-
-**Backend** (`backend/.env`):
-```env
-# LLM Settings
-OLLAMA_MODEL=llama3.2:1b
-OLLAMA_BASE_URL=http://ollama:11434
-OLLAMA_TEMPERATURE=0.4
-OLLAMA_NUM_CTX=1048
-
-# Embedding Model
-EMBED_MODEL_NAME=nomic-embed-text
-
-# Tavily API (Web Search)
-TAVILY_API_KEY=your_api_key_here
-
-# Authentication
-BACKEND_JWT_SECRET=change-me
-
-# API Settings
-DEBUG=true
-LOG_LEVEL=INFO
-```
-
-**Frontend** (`.env.local`):
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-## 📊 Logging
-
-The application uses structured JSON logging for production monitoring:
-
-
-- **Location**: `backend/logs/`
-- **Files**:
-  - `app.log` - All application logs
-  - `errors.log` - Error-level logs only
-- **Format**: JSON (production) or text (development)
-- **Levels**: DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 ## 🐛 Troubleshooting
 
@@ -374,94 +306,12 @@ docker exec mapey-ollama-1 ollama pull llama3.2:1b
 docker-compose restart backend
 ```
 
-### Frontend not loading
-```powershell
-# Check logs
-docker-compose logs frontend --tail=50
-
-# Restart frontend
-docker-compose restart frontend
-```
-
-### Backend errors
-```powershell
-# Check backend logs
-docker-compose logs backend --tail=50 --follow
-
-# Check if Ollama is ready
-docker exec mapey-ollama-1 ollama list
-```
-
-### Progress bar not showing
-- Make sure you're using "Enter Text" or "Upload Resume" button
-- Streaming works for both text and file input
-- Check browser console for errors (F12)
-- Verify backend logs show streaming endpoint
-
-### File upload not working
-- Supported formats: PDF, TXT
-- File must be less than 10MB
-- Check browser console for errors
-- Verify backend logs for file processing errors
-
 ### Slow generation
 - Normal processing time: **3-5 minutes**
 - Depends on hardware (CPU-based LLM)
 - Check resource usage: `docker stats`
 - First generation may be slower (model loading)
 
-## 📁 Project Structure
-
-```
-mapey/
-├── backend/                 # FastAPI backend
-│   ├── app/
-│   │   ├── api/            # API routes
-│   │   │   └── routes/
-│   │   │       ├── roadmap.py      # Roadmap endpoints + streaming
-│   │   │       └── health.py       # Health check
-│   │   ├── core/           # Core utilities
-│   │   │   ├── config.py           # Configuration
-│   │   │   ├── auth.py             # JWT authentication
-│   │   │   └── logging.py          # Logging setup
-│   │   ├── models/         # Data models
-│   │   │   └── schemas.py          # Pydantic schemas
-│   │   ├── services/       # Business logic
-│   │   │   ├── agents.py           # LangGraph agents + progress
-│   │   │   ├── vector_store.py     # FAISS vector store
-│   │   │   ├── ollama_service.py   # Ollama integration
-│   │   │   └── file_processor.py   # File handling
-│   │   └── main.py         # FastAPI app
-│   ├── .env                # Environment variables
-│   ├── requirements.txt    # Python dependencies
-│   └── Dockerfile          # Backend container
-├── frontend/                # Next.js frontend
-│   ├── app/                # App router pages
-│   │   ├── page.tsx                # Home page
-│   │   ├── layout.tsx              # Root layout
-│   │   └── globals.css             # Global styles + animations
-│   ├── components/         # React components
-│   │   ├── RoadmapForm.tsx         # Input form
-│   │   ├── RoadmapResults.tsx      # Results display + progress
-│   │   ├── ProgressBar.tsx         # Progress bar component
-│   │   ├── Header.tsx              # Header component
-│   │   └── LoadingSpinner.tsx      # Spinner component
-│   ├── lib/                # Utilities
-│   │   ├── api.ts                  # API client + streaming
-│   │   └── store.ts                # Zustand store + progress
-│   ├── types/              # TypeScript types
-│   │   └── api.ts                  # API type definitions
-│   ├── package.json        # Node dependencies
-│   └── Dockerfile          # Frontend container
-├── docs/                    # Documentation
-│   ├── PROGRESS_BAR_GUIDE.md       # Progress bar docs
-│   ├── PROGRESS_BAR_COMPLETE.md    # Complete implementation
-│   ├── SETUP_GUIDE.md              # Setup instructions
-│   └── PROJECT_STRUCTURE.md        # Architecture docs
-├── docker-compose.yml       # Multi-container orchestration
-├── README.md               # This file
-└── test_api.ps1            # API test script
-```
 
 ## 🌟 Technologies Used
 
@@ -490,22 +340,6 @@ mapey/
 - **Docker Compose** - Multi-container orchestration
 - **Node.js 20** - JavaScript runtime
 
-## 📚 Documentation
-
-- **[Progress Bar Guide](PROGRESS_BAR_COMPLETE.md)** - Complete progress tracking documentation
-- **[Setup Guide](docs/SETUP_GUIDE.md)** - Detailed setup instructions
-- **[Working Status](WORKING_STATUS.md)** - Current project status
-- **[API Docs](http://localhost:8000/docs)** - Interactive API documentation (when running)
-
-## 🔒 Security Considerations
-
-- ⚠️ **Change JWT Secret** in production (`BACKEND_JWT_SECRET`)
-- ⚠️ **Set DEBUG=false** in production
-- ⚠️ **Configure proper CORS** for your domain
-- ⚠️ **Use HTTPS** in production
-- ⚠️ **Add rate limiting** for public deployments
-- ⚠️ **Secure Tavily API key**
-
 ## 📊 Performance
 
 - **Generation Time**: 3-5 minutes (varies by hardware)
@@ -513,16 +347,6 @@ mapey/
 - **Disk Usage**: ~3GB (includes models)
 - **CPU**: CPU-based LLM (no GPU required)
 - **Concurrent Users**: Limited by CPU (single-threaded LLM)
-
-## 🔐 Production Considerations
-
-1. **Environment Variables**: Never commit `.env` files. Use secrets management.
-2. **CORS**: Configure `CORS_ORIGINS` for your production domain.
-3. **Rate Limiting**: Consider adding rate limiting middleware.
-4. **Authentication**: JWT tokens with secure secrets.
-5. **Database**: Consider persisting vector store and user data.
-6. **Monitoring**: Set up APM tools (e.g., Sentry, DataDog).
-7. **Scaling**: Use process managers (Gunicorn, Uvicorn workers) for production.
 
 ## 📝 License
 
@@ -548,16 +372,16 @@ Contributions welcome! Please:
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/mapey/issues)
+- **Issues**: [GitHub Issues](https://github.com/muditgaur-1009/mapey/issues)
 - **Documentation**: See `/docs` folder
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by the Mapey Team**
+**Made with ❤️ by Mudit Gaur**
 
-⭐ Star us on GitHub if you find this helpful!
+⭐ Star this project on GitHub if you fonnd this helpful!
 
 </div>
 
